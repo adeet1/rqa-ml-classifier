@@ -46,13 +46,9 @@ def cross_validation(df, k):
         sc = StandardScaler().fit(X_train)
         X_train = pd.DataFrame(sc.transform(X_train))
         X_test = pd.DataFrame(sc.transform(X_test))
-
-        # Display progress
-        print("Train: rows", min(train.index), "to", max(train.index),
-              "\tTest: rows", min(test.index), "to", max(test.index))
         
         # Fit the model
-        model = RandomForestClassifier(n_estimators=200)
+        model = RandomForestClassifier(n_estimators=200, max_depth=4)
         model.fit(X_train, Y_train)
 
         # Make predictions
@@ -77,7 +73,10 @@ def cross_validation(df, k):
         results = np.add(results, current_scores)
 
         # Compute average train/test scores
-        print(list(np.array(results) / (i + 1)))
+        # Display progress
+        print("Train: rows", min(train.index), "to", max(train.index),
+              "\tTest: rows", min(test.index), "to", max(test.index),
+              "\t", np.round(np.array(results) / (i + 1), 3))
 
 #########################################
 
