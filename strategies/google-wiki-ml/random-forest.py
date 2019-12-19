@@ -3,6 +3,7 @@ import numpy as np
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import StandardScaler
+from feature_selector import FeatureSelector
 
 # Import raw data set
 df0 = pd.read_excel("aapl.xlsx").iloc[2:, :].reset_index(drop = True)
@@ -14,12 +15,6 @@ df0["Goog ROC"] = df0["Goog ROC"].astype(float)
 
 # Select columns from data set
 df = df0[["Open", "Close", "High", "Low", "RS", "Wiki Traffic- 1 Day Lag", "Wiki 5day disparity", "Wiki Move", "Wiki MA3 Move", "Wiki MA5 Move", "Wiki EMA5 Move", "Goog RS", "Goog MA3", "Goog MA5", "Goog EMA5 Move", "Goog 3day Disparity Move", "Goog ROC Move", "Goog RSI Move", "Wiki 3day Disparity", "Price RSI Move", "Google_Move", "Target"]]
-
-# List of features
-features = ["Wiki Traffic- 1 Day Lag", "Wiki 5day disparity", "Wiki Move", "Wiki MA3 Move", "Wiki MA5 Move", "Wiki EMA5 Move", "Goog MA3", "Target"]
-
-# Select features
-df = df[features]
 
 # Supress warnings
 import warnings
@@ -33,6 +28,7 @@ def cross_validation(df, k):
     train = pd.DataFrame()
 
     results = np.zeros(8)
+    # Loop ==================
     for i in range(k - 1):
         train = pd.concat([train, pd.DataFrame(split[i])])
         X_train = train.iloc[:, :-1]
@@ -42,6 +38,14 @@ def cross_validation(df, k):
         X_test = test.iloc[:, :-1]
         Y_test = test.iloc[:, -1]
 
+        # Feature selection (remove highly correlated features)
+        fs = FeatureSelector(data = X_train, labels = X_train.columns)
+        fs.identify_collinear(correlation_threshold = 0.7) # select features from training set
+        corr = fs.ops['collinear']
+        X_train = fs.remove(methods = ['collinear']) # remove selected features from training set
+        to_remove = pd.unique(fs.record_collinear['drop_feature']) # features to remove
+        X_test = X_test.drop(columns = to_remove) # remove selected features from test set
+        
         # Feature scaling
         sc = StandardScaler().fit(X_train)
         X_train = pd.DataFrame(sc.transform(X_train))
@@ -78,6 +82,8 @@ def cross_validation(df, k):
               "\tTest: rows", min(test.index), "to", max(test.index),
               "\t", np.round(np.array(results) / (i + 1), 3))
 
+    # End of loop ==================
+
 #########################################
 
-cross_validation(df, 157)
+cross_validation(df, 5)
