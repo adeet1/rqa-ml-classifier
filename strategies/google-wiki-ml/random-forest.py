@@ -39,17 +39,19 @@ def cross_validation(df, k):
         Y_test = test.iloc[:, -1]
 
         # Feature selection (remove highly correlated features)
+        n = len(X_train.columns)
         fs = FeatureSelector(data = X_train, labels = X_train.columns)
         fs.identify_collinear(correlation_threshold = 0.7) # select features from training set
         corr = fs.ops['collinear']
         X_train = fs.remove(methods = ['collinear']) # remove selected features from training set
         to_remove = pd.unique(fs.record_collinear['drop_feature']) # features to remove
         X_test = X_test.drop(columns = to_remove) # remove selected features from test set
+        print("Data has", n, "features, but using", len(X_train.columns))
         
         # Feature scaling
         sc = StandardScaler().fit(X_train)
-        X_train = pd.DataFrame(sc.transform(X_train))
-        X_test = pd.DataFrame(sc.transform(X_test))
+        X_train = pd.DataFrame(sc.transform(X_train), columns = X_train.columns)
+        X_test = pd.DataFrame(sc.transform(X_test), columns = X_test.columns)
         
         # Fit the model
         model = RandomForestClassifier(n_estimators=200, max_depth=4)
@@ -79,9 +81,25 @@ def cross_validation(df, k):
         # Compute average train/test scores
         # Display progress
         print("Train: rows", min(train.index), "to", max(train.index),
-              "\tTest: rows", min(test.index), "to", max(test.index),
-              "\t", np.round(np.array(results) / (i + 1), 3))
+              "\t", np.round(np.array(results) / (i + 1), 3)[0:4],
+              "\t\tTest: rows", min(test.index), "to", max(test.index),
+              "\t", np.round(np.array(results) / (i + 1), 3)[4:])
 
+    # Feature importances
+    feature_imp = {}
+    for i in range(len(X_train.columns)):
+        col = X_train.columns[i]
+        try:
+            val = model.feature_importances_[i]
+        except AttributeError:
+            val = -1 # if feature importances are undefined, use -1 as a sentinel value
+        feature_imp[col] = [val]
+        
+    feature_imp = pd.DataFrame(feature_imp).T
+    feature_imp.columns = ["Importance"]
+    feature_imp = feature_imp.sort_values(by = "Importance", ascending = False)
+    print(feature_imp)
+    
     # End of loop ==================
 
 #########################################
