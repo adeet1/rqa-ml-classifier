@@ -38,6 +38,11 @@ def cross_validation(df, k):
         X_test = test.iloc[:, :-1]
         Y_test = test.iloc[:, -1]
 
+        # Feature scaling
+        sc = StandardScaler().fit(X_train)
+        X_train = pd.DataFrame(sc.transform(X_train), columns = X_train.columns)
+        X_test = pd.DataFrame(sc.transform(X_test), columns = X_test.columns)
+        
         # Feature selection (remove highly correlated features)
         n = len(X_train.columns)
         fs = FeatureSelector(data = X_train, labels = X_train.columns)
@@ -47,12 +52,7 @@ def cross_validation(df, k):
         to_remove = pd.unique(fs.record_collinear['drop_feature']) # features to remove
         X_test = X_test.drop(columns = to_remove) # remove selected features from test set
         print("Data has", n, "features, but using", len(X_train.columns))
-        
-        # Feature scaling
-        sc = StandardScaler().fit(X_train)
-        X_train = pd.DataFrame(sc.transform(X_train), columns = X_train.columns)
-        X_test = pd.DataFrame(sc.transform(X_test), columns = X_test.columns)
-        
+
         # Fit the model
         model = RandomForestClassifier(n_estimators=200, max_depth=4)
         model.fit(X_train, Y_train)
