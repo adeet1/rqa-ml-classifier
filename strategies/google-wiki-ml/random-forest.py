@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.ensemble import RandomForestClassifier
+from sklearn.decomposition import PCA
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 from sklearn.preprocessing import StandardScaler
 from feature_selector import FeatureSelector
@@ -53,6 +54,11 @@ def cross_validation(df, k):
         X_test = X_test.drop(columns = to_remove) # remove selected features from test set
         print("Data has", n, "features, but using", len(X_train.columns))
 
+        # Principal component analysis (PCA)
+        pca = PCA(n_components = 5, random_state = None)
+        X_train = pd.DataFrame(pca.fit_transform(X_train))
+        X_test = pd.DataFrame(pca.fit_transform(X_test))
+        
         # Fit the model
         model = RandomForestClassifier(n_estimators=200, max_depth=4)
         model.fit(X_train, Y_train)
