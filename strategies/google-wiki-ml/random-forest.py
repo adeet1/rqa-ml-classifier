@@ -57,7 +57,7 @@ def cross_validation(df, k):
         # Principal component analysis (PCA)
         pca = PCA(n_components = 5, random_state = None)
         X_train = pd.DataFrame(pca.fit_transform(X_train))
-        X_test = pd.DataFrame(pca.fit_transform(X_test))
+        X_test = pd.DataFrame(pca.transform(X_test))
         
         # Fit the model
         model = RandomForestClassifier(n_estimators=200, max_depth=4)
