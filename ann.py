@@ -22,8 +22,18 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2, rando
 # Feature scaling
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler()
-X_train = sc.fit_transform(X_train)
-X_test = sc.transform(X_test)
+X_train = pd.DataFrame(sc.fit_transform(X_train), columns = X_train.columns)
+X_test = pd.DataFrame(sc.transform(X_test), columns = X_test.columns)
+
+# Feature selection (remove highly correlated features)
+from feature_selector import FeatureSelector
+n = len(X_train.T)
+fs = FeatureSelector(data = X_train)
+fs.identify_collinear(correlation_threshold = 0.7) # select features from training set
+corr = fs.ops['collinear']
+X_train = fs.remove(methods = ['collinear']) # remove selected features from training set
+to_remove = pd.unique(fs.record_collinear['drop_feature']) # features to remove
+X_test = X_test.drop(columns = to_remove) # remove selected features from test set
 
 # Create the artificial neural network
 import keras
