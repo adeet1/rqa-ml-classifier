@@ -118,8 +118,8 @@ def cross_validation(df, k):
     print("")
     print(feature_imp)
     
-    # End of loop ==================
-
+    return Y_train_pred, Y_test_pred
+    
 #########################################
 
-cross_validation(df, 5)
+Y_train_pred, Y_test_pred = cross_validation(df, 5)
