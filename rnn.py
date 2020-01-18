@@ -35,15 +35,15 @@ from keras.layers import Dense
 from keras.layers import LSTM
 from keras.layers import Dropout
 model = Sequential() # initialize the RNN
-model.add(LSTM(units = 10, return_sequences = True, input_shape = (X_train.shape[1], 1))) # input shape: (number of features, 1)
-model.add(LSTM(units = 10, return_sequences = True))
-model.add(LSTM(units = 10, return_sequences = True))
-model.add(LSTM(units = 10))
+model.add(LSTM(units = 20, return_sequences = True, input_shape = (X_train.shape[1], 1))) # input shape: (number of features, 1)
+model.add(LSTM(units = 20, return_sequences = True))
+model.add(LSTM(units = 20, return_sequences = True))
+model.add(LSTM(units = 20))
 model.add(Dense(units = 1))
-model.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = ["accuracy"])
+model.compile(optimizer = "rmsprop", loss = "binary_crossentropy", metrics = ["accuracy"])
 
 # Train the neural network
-model.fit(X_train_3D, Y_train, epochs = 10, batch_size = 5)
+model.fit(X_train_3D, Y_train, epochs = 50, batch_size = 5, shuffle = False)
 
 # Make predictions
 Y_test_pred_prob = model.predict(X_test_3D)
