@@ -52,14 +52,14 @@ def cross_validation(df, k):
         X_train = fs.remove(methods = ['collinear']) # remove selected features from training set
         to_remove = pd.unique(fs.record_collinear['drop_feature']) # features to remove
         X_test = X_test.drop(columns = to_remove) # remove selected features from test set
-        print("Data has", n, "features, but using", len(X_train.columns))
-
+        
         # Principal component analysis (PCA)
         pca = PCA(n_components = 5, random_state = None)
         X_train = pd.DataFrame(pca.fit_transform(X_train))
         X_test = pd.DataFrame(pca.transform(X_test))
         
         # Fit the model
+        print("Data has", n, "features, but training on", len(X_train.columns))
         model = RandomForestClassifier(n_estimators=200, max_depth=4)
         model.fit(X_train, Y_train)
 
@@ -83,13 +83,24 @@ def cross_validation(df, k):
 
         # Add them to the results
         results = np.add(results, current_scores)
+        metrics = results / (i + 1)
 
         # Compute average train/test scores
         # Display progress
-        print("Train: rows", min(train.index), "to", max(train.index),
-              "\t", np.round(np.array(results) / (i + 1), 3)[0:4],
-              "\t\tTest: rows", min(test.index), "to", max(test.index),
-              "\t", np.round(np.array(results) / (i + 1), 3)[4:])
+        print("Train: rows", min(train.index), "to", max(train.index))
+        print("\tacc:      ", np.round(metrics[0], 3))
+        print("\tprecision:", np.round(metrics[1], 3))
+        print("\trecall:   ", np.round(metrics[2], 3))
+        print("\tf1:       ", np.round(metrics[3], 3))
+        print("")
+        print("Test:  rows", min(test.index), "to", max(test.index))
+        print("\tacc:      ", np.round(metrics[4], 3))
+        print("\tprecision:", np.round(metrics[5], 3))
+        print("\trecall:   ", np.round(metrics[6], 3))
+        print("\tf1:       ", np.round(metrics[7], 3))
+        print("==================================")
+        
+    # End of loop ==================
 
     # Feature importances
     feature_imp = {}
@@ -104,6 +115,7 @@ def cross_validation(df, k):
     feature_imp = pd.DataFrame(feature_imp).T
     feature_imp.columns = ["Importance"]
     feature_imp = feature_imp.sort_values(by = "Importance", ascending = False)
+    print("")
     print(feature_imp)
     
     # End of loop ==================
