@@ -1,125 +1,97 @@
 import pandas as pd
-import numpy as np
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.decomposition import PCA
-from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-from sklearn.preprocessing import StandardScaler
-from feature_selector import FeatureSelector
 
-# Import raw data set
-df0 = pd.read_excel("aapl.xlsx").iloc[2:, :].reset_index(drop = True)
+# Import data
+df = pd.read_excel("aapl.xlsx").iloc[2:, :].reset_index(drop = True)
 
 # Remove the first 14 rows and the last row (we don't have future data in the present)
-df0 = df0.iloc[14:-1, :].reset_index(drop = True)
-df0["Wiki Move"] = df0["Wiki Move"].astype(int)
-df0["Goog ROC"] = df0["Goog ROC"].astype(float)
+df = df.iloc[14:-1, :].reset_index(drop = True)
+df["Wiki Move"] = df["Wiki Move"].astype(int)
+df["Goog ROC"] = df["Goog ROC"].astype(float)
 
-# Select columns from data set
-df = df0[["Open", "Close", "High", "Low", "RS", "Wiki Traffic- 1 Day Lag", "Wiki 5day disparity", "Wiki Move", "Wiki MA3 Move", "Wiki MA5 Move", "Wiki EMA5 Move", "Goog RS", "Goog MA3", "Goog MA5", "Goog EMA5 Move", "Goog 3day Disparity Move", "Goog ROC Move", "Goog RSI Move", "Wiki 3day Disparity", "Price RSI Move", "Google_Move", "Target"]]
+# Remove redundant columns
+df = df.drop(columns = ["Open", "Close", "High", "Low"]) # price info already reflected in features
+df = df.drop(columns = ["Gain", "Loss"]) # already reflected in "Change in Close"
+df = df.drop(columns = ["PE Ratio"]) # ignore this feature altogether
+df = df.drop(columns = ["Goog Gain", "Goog Loss"]) # already reflected in "Change in Goog"
+df = df.drop(columns = ["Wiki Traffic"]) # already reflected in "Wiki Traffic- 1 Day Lag"
 
-# Supress warnings
-import warnings
-warnings.filterwarnings("ignore")
+# Train/test split
+X = df.iloc[:, 1:-1]
+Y = df.iloc[:, -1]
 
-# Perform forward chaining cross validation
-def cross_validation(df, k):
-    # k = number of folds
-    split = np.split(df, k)
+def train_test_split(X, Y, test_size):
+    ind = int((1 - test_size) * len(X))
+    X_train = X.iloc[:ind, :]
+    X_test = X.iloc[ind:, :]
+    Y_train = Y.iloc[:ind]
+    Y_test = Y.iloc[ind:]
+    return X_train, X_test, Y_train, Y_test
 
-    train = pd.DataFrame()
+X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2)
 
-    results = np.zeros(8)
-    # Loop ==================
-    for i in range(k - 1):
-        train = pd.concat([train, pd.DataFrame(split[i])])
-        X_train = train.iloc[:, :-1]
-        Y_train = train.iloc[:, -1]
+# Feature scaling
+from sklearn.preprocessing import StandardScaler
+sc = StandardScaler().fit(X_train)
+X_train = sc.transform(X_train)
+X_train = pd.DataFrame(X_train, columns = X.columns)
 
-        test = pd.DataFrame(split[i + 1])
-        X_test = test.iloc[:, :-1]
-        Y_test = test.iloc[:, -1]
+# Calculate feature correlations
+feature_correlations = X_train.corrwith(Y_train, method = "pearson")
+feature_correlations = feature_correlations.sort_values(ascending = False)
 
-        # Feature scaling
-        sc = StandardScaler().fit(X_train)
-        X_train = pd.DataFrame(sc.transform(X_train), columns = X_train.columns)
-        X_test = pd.DataFrame(sc.transform(X_test), columns = X_test.columns)
-        
-        # Feature selection (remove highly correlated features)
-        n = len(X_train.columns)
-        fs = FeatureSelector(data = X_train, labels = X_train.columns)
-        fs.identify_collinear(correlation_threshold = 0.7) # select features from training set
-        corr = fs.ops['collinear']
-        X_train = fs.remove(methods = ['collinear']) # remove selected features from training set
-        to_remove = pd.unique(fs.record_collinear['drop_feature']) # features to remove
-        X_test = X_test.drop(columns = to_remove) # remove selected features from test set
-        
-        # Principal component analysis (PCA)
-        pca = PCA(n_components = 5, random_state = None)
-        X_train = pd.DataFrame(pca.fit_transform(X_train))
-        X_test = pd.DataFrame(pca.transform(X_test))
-        
-        # Fit the model
-        print("Data has", n, "features, but training on", len(X_train.columns))
-        model = RandomForestClassifier(n_estimators=200, max_depth=4)
-        model.fit(X_train, Y_train)
+# Feature selection
+import numpy as np
+from scipy.cluster import hierarchy
+from scipy.spatial import distance
+import seaborn as sb
+import matplotlib.pyplot as plt
 
-        # Make predictions
-        Y_test_pred = pd.Series(model.predict(X_test)).astype(int)
-        Y_train_pred = pd.Series(model.predict(X_train)).astype(int)
-
-        # Results
-        labels = ["Accuracy", "Precision", "Recall", "F1 Score"]
-        test_scores = [accuracy_score(Y_test, Y_test_pred),
-                       precision_score(Y_test, Y_test_pred),
-                       recall_score(Y_test, Y_test_pred),
-                       f1_score(Y_test, Y_test_pred)]
-        train_scores = [accuracy_score(Y_train, Y_train_pred),
-                        precision_score(Y_train, Y_train_pred),
-                        recall_score(Y_train, Y_train_pred),
-                        f1_score(Y_train, Y_train_pred)]
-
-        # Concatenate the lists of test and train scores
-        current_scores = train_scores + test_scores
-
-        # Add them to the results
-        results = np.add(results, current_scores)
-        metrics = results / (i + 1)
-
-        # Compute average train/test scores
-        # Display progress
-        print("Train: rows", min(train.index), "to", max(train.index))
-        print("\tacc:      ", np.round(metrics[0], 3))
-        print("\tprecision:", np.round(metrics[1], 3))
-        print("\trecall:   ", np.round(metrics[2], 3))
-        print("\tf1:       ", np.round(metrics[3], 3))
-        print("")
-        print("Test:  rows", min(test.index), "to", max(test.index))
-        print("\tacc:      ", np.round(metrics[4], 3))
-        print("\tprecision:", np.round(metrics[5], 3))
-        print("\trecall:   ", np.round(metrics[6], 3))
-        print("\tf1:       ", np.round(metrics[7], 3))
-        print("==================================")
-        
-    # End of loop ==================
-
-    # Feature importances
-    feature_imp = {}
-    for i in range(len(X_train.columns)):
-        col = X_train.columns[i]
-        try:
-            val = model.feature_importances_[i]
-        except AttributeError:
-            val = -1 # if feature importances are undefined, use -1 as a sentinel value
-        feature_imp[col] = [val]
-        
-    feature_imp = pd.DataFrame(feature_imp).T
-    feature_imp.columns = ["Importance"]
-    feature_imp = feature_imp.sort_values(by = "Importance", ascending = False)
-    print("")
-    print(feature_imp)
+def plot_clustermap(corr_matrix):
+    # https://alphascientist.com/feature_selection.html
+    corr_array = np.asarray(corr_matrix)
     
-    return Y_train_pred, Y_test_pred
+    linkage = hierarchy.linkage(distance.pdist(corr_array), method = "average")
     
-#########################################
+    g = sb.clustermap(corr_matrix, row_linkage = linkage, col_linkage = linkage, row_cluster = True, col_cluster = True, figsize = (10, 10), cmap = "Greens")
+    plt.setp(g.ax_heatmap.yaxis.get_majorticklabels(), rotation = 0)
+    plt.show()
 
-Y_train_pred, Y_test_pred = cross_validation(df, 5)
+corr_matrix = X_train.corr()
+plot_clustermap(corr_matrix)
+
+correlated_features = feature_correlations[np.abs(feature_correlations) >= 0.05].index.tolist()
+corr_matrix_filt = X_train[correlated_features].corr()
+plot_clustermap(corr_matrix_filt)
+feature_correlations_filt = feature_correlations[np.abs(feature_correlations) >= 0.05].sort_values(ascending = False)
+
+X_train = X_train[correlated_features]
+X_test = X_test[correlated_features]
+
+from sklearn.ensemble import RandomForestClassifier
+model = RandomForestClassifier(n_estimators = 200, max_depth = 4, random_state = 1)
+model.fit(X_train, Y_train)
+
+# Make predictions
+Y_test_pred = pd.Series(model.predict(X_test)).astype(int)
+Y_train_pred = pd.Series(model.predict(X_train)).astype(int)
+
+# Evaluate model
+from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+train_scores = np.array([accuracy_score(Y_train, Y_train_pred),
+                         precision_score(Y_train, Y_train_pred),
+                         recall_score(Y_train, Y_train_pred),
+                         f1_score(Y_train, Y_train_pred)]) * 100
+    
+test_scores = np.array([accuracy_score(Y_test, Y_test_pred),
+                        precision_score(Y_test, Y_test_pred),
+                        recall_score(Y_test, Y_test_pred),
+                        f1_score(Y_test, Y_test_pred)]) * 100
+
+train_scores = np.round(train_scores, 1)
+test_scores = np.round(test_scores, 1)
+
+metrics = pd.DataFrame()
+metrics["Training Set"] = train_scores
+metrics["Test Set"] = test_scores
+metrics = metrics.set_index(np.array(["Accuracy", "Precision", "Recall", "F1 Score"]))
+print(metrics)
