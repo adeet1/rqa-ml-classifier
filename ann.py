@@ -47,9 +47,9 @@ num_hidden_nodes = int((num_input_nodes + num_output_nodes) / 2) # a typical val
 
 # Add layers
 classifier = Sequential()
-classifier.add(Dense(output_dim = num_hidden_nodes, init = "uniform", activation = "relu",
+classifier.add(Dense(output_dim = num_hidden_nodes, init = "uniform", activation = "sigmoid",
                      input_dim = num_input_nodes))
-classifier.add(Dense(output_dim = num_hidden_nodes, init = "uniform", activation = "relu"))
+classifier.add(Dense(output_dim = num_hidden_nodes, init = "uniform", activation = "sigmoid"))
 
 # Use sigmoid activation function for the output layer because we're predicting
 # a probability that the stock price will go up
