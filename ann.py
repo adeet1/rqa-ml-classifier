@@ -60,10 +60,10 @@ classifier.compile(optimizer = "adam", loss = "binary_crossentropy", metrics = [
 classifier.fit(X_train, Y_train, batch_size = 10, nb_epoch = 25)
 
 # Make predictions
-Y_test_pred = (Y_test_pred >= 0.5)
-Y_train_pred = (Y_train_pred >= 0.5)
 Y_test_pred_prob = classifier.predict(X_test)
+Y_test_pred = (Y_test_pred_prob >= 0.5)
 Y_train_pred_prob = classifier.predict(X_train)
+Y_train_pred = (Y_train_pred_prob >= 0.5)
 
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 def metrics(actual, pred):
