@@ -1,3 +1,7 @@
+# Set random seed
+from numpy.random import seed
+seed(1)
+
 import pandas as pd
 
 # Import raw data set
