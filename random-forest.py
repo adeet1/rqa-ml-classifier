@@ -37,7 +37,7 @@ df["Stochastic Oscillator (14 days)"] = df["Stochastic Oscillator (14 days)"].as
 X = df.iloc[:, 1:-1]
 Y = df.iloc[:, -1]
 
-def train_test_split(X, Y, test_size):
+def dataset_split(X, Y, test_size):
     ind = int((1 - test_size) * len(X))
     X_train = X.iloc[:ind, :]
     X_test = X.iloc[ind:, :]
@@ -45,7 +45,7 @@ def train_test_split(X, Y, test_size):
     Y_test = Y.iloc[ind:]
     return X_train, X_test, Y_train, Y_test
 
-X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2)
+X_train, X_test, Y_train, Y_test = dataset_split(X, Y, test_size = 0.2)
 
 # Feature scaling
 from sklearn.preprocessing import StandardScaler
