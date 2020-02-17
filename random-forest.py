@@ -30,6 +30,8 @@ df = df.drop(columns = ["Goog 3day Disparity"]) # reflected in Goog 3day Dispari
 df = df.drop(columns = ["Goog RSI (14 days)"]) # reflected in Goog RSI Move
 df = df.drop(columns = ["Price RSI (14 days)"]) # reflected in Price RSI Move
 
+# Fix column data format
+df["Stochastic Oscillator (14 days)"] = df["Stochastic Oscillator (14 days)"].astype(float)
 
 # Train/test split
 X = df.iloc[:, 1:-1]
