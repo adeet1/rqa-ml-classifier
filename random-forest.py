@@ -50,40 +50,10 @@ X_train, X_test, Y_train, Y_test = train_test_split(X, Y, test_size = 0.2)
 # Feature scaling
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler().fit(X_train)
-X_train = sc.transform(X_train)
-X_train = pd.DataFrame(X_train, columns = X.columns)
-
-# Calculate feature correlations
-feature_correlations = X_train.corrwith(Y_train, method = "pearson")
-feature_correlations = feature_correlations.sort_values(ascending = False)
-
-# Feature selection
-import numpy as np
-from scipy.cluster import hierarchy
-from scipy.spatial import distance
-import seaborn as sb
-import matplotlib.pyplot as plt
-
-def plot_clustermap(corr_matrix):
-    # https://alphascientist.com/feature_selection.html
-    corr_array = np.asarray(corr_matrix)
-    
-    linkage = hierarchy.linkage(distance.pdist(corr_array), method = "average")
-    
-    g = sb.clustermap(corr_matrix, row_linkage = linkage, col_linkage = linkage, row_cluster = True, col_cluster = True, figsize = (10, 10), cmap = "Greens")
-    plt.setp(g.ax_heatmap.yaxis.get_majorticklabels(), rotation = 0)
-    plt.show()
 
 corr_matrix = X_train.corr()
-plot_clustermap(corr_matrix)
 
-correlated_features = feature_correlations[np.abs(feature_correlations) >= 0.05].index.tolist()
-corr_matrix_filt = X_train[correlated_features].corr()
-plot_clustermap(corr_matrix_filt)
-feature_correlations_filt = feature_correlations[np.abs(feature_correlations) >= 0.05].sort_values(ascending = False)
 
-X_train = X_train[correlated_features]
-X_test = X_test[correlated_features]
 
 from sklearn.ensemble import RandomForestClassifier
 model = RandomForestClassifier(n_estimators = 200, max_depth = 4, random_state = 1)
