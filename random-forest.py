@@ -1,6 +1,5 @@
-import pandas as pd
-
 # Import data
+import pandas as pd
 df = pd.read_excel("aapl.xlsx").iloc[2:, :].reset_index(drop = True)
 
 # Remove the first 14 rows and the last row (we don't have future data in the present)
@@ -50,10 +49,50 @@ X_train, X_test, Y_train, Y_test = dataset_split(X, Y, test_size = 0.2)
 # Feature scaling
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler().fit(X_train)
+X_train = pd.DataFrame(sc.transform(X_train), columns = X.columns)
+X_test = pd.DataFrame(sc.transform(X_test), columns = X.columns)
 
+# Each feature's correlation with every other feature
 corr_matrix = X_train.corr()
 
+# Each feature's correlation with the target variable
+feature_target_corr = X_train.corrwith(Y_train, method = "pearson")
+feature_target_corr = feature_target_corr.sort_values(ascending = False)
 
+# Each feature's correlation with every other feature
+corr_matrix = X_train.corr()
+
+# Select features based on correlation
+all_features = X.columns.to_list()
+selected_features = all_features[:]
+for i in range(0, len(corr_matrix)):
+    for j in range(i, len(corr_matrix)):
+        # Process every pair of features
+        corr = corr_matrix.iloc[i, j] 
+        if abs(corr) > 0.5 and corr != 1:
+            feature1 = all_features[i]
+            feature2 = all_features[j]
+            
+            # Out of the two features in the current pair, remove the feature that
+            # is less correlated with the target variable
+            corr1 = feature_target_corr[feature1]
+            corr2 = feature_target_corr[feature2]
+            try:
+                if abs(corr1) < abs(corr2):
+                    selected_features.remove(feature1)
+                    print("Removed from list of features:", feature1)
+                else:
+                    selected_features.remove(feature2)
+                    print("Removed from list of features:", feature2)
+            except ValueError:
+                # Catch the error just in case we're trying to remove a feature
+                # that's already been removed
+                pass
+
+X_train = X_train[selected_features]
+X_test = X_test[selected_features]
+
+corr_matrix_selected_features = X_train.corr()
 
 from sklearn.ensemble import RandomForestClassifier
 model = RandomForestClassifier(n_estimators = 200, max_depth = 4, random_state = 1)
