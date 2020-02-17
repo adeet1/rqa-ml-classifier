@@ -94,6 +94,18 @@ X_test = X_test[selected_features]
 
 corr_matrix_selected_features = X_train.corr()
 
+# Plot number of components vs. explained variance for PCA algorithm
+from sklearn.decomposition import PCA
+import matplotlib.pyplot as plt
+import numpy as np
+pca = PCA().fit(X_train)
+plt.figure()
+plt.plot(np.cumsum(pca.explained_variance_ratio_))
+plt.xlabel('Number of Components')
+plt.ylabel('Variance (%)') # for each component
+plt.show()
+
+# Model =======================================================================================
 from sklearn.ensemble import RandomForestClassifier
 model = RandomForestClassifier(n_estimators = 200, max_depth = 4, random_state = 1)
 model.fit(X_train, Y_train)
@@ -117,6 +129,7 @@ test_scores = np.array([accuracy_score(Y_test, Y_test_pred),
 train_scores = np.round(train_scores, 1)
 test_scores = np.round(test_scores, 1)
 
+# Print metrics
 metrics = pd.DataFrame()
 metrics["Training Set"] = train_scores
 metrics["Test Set"] = test_scores
