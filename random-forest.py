@@ -8,12 +8,28 @@ df = df.iloc[14:-1, :].reset_index(drop = True)
 df["Wiki Move"] = df["Wiki Move"].astype(int)
 df["Goog ROC"] = df["Goog ROC"].astype(float)
 
-# Remove redundant columns
-df = df.drop(columns = ["Open", "Close", "High", "Low"]) # price info already reflected in features
-df = df.drop(columns = ["Gain", "Loss"]) # already reflected in "Change in Close"
-df = df.drop(columns = ["PE Ratio"]) # ignore this feature altogether
-df = df.drop(columns = ["Goog Gain", "Goog Loss"]) # already reflected in "Change in Goog"
-df = df.drop(columns = ["Wiki Traffic"]) # already reflected in "Wiki Traffic- 1 Day Lag"
+# Remove the columns that are used to calculate features
+df = df.drop(columns = ["Open", "Close", "High", "Low"]) # prices reflected in other features
+df = df.drop(columns = ["Gain", "Loss"]) # reflected in "Change in Close"
+df = df.drop(columns = ["Average Gain", "Average Loss"]) # reflected in RS
+df = df.drop(columns = ["RS"]) # reflected in 14-day Price RSI
+df = df.drop(columns = ["Wiki Traffic"]) # reflected in Wiki Traffic- 1 Day Lag
+df = df.drop(columns = ["Wiki Traffic- 1 Day Lag"]) # reflected in Wiki features
+df = df.drop(columns = ["PE Ratio"]) # ignore this feature entirely
+df = df.drop(columns = ["Wiki 5day disparity"]) # reflected in Wiki 5day Disparity Move
+df = df.drop(columns = ["Wiki MA3 Move"]) # reflected in Wiki 3day Disparity
+df = df.drop(columns = ["Wiki MA5 Move"]) # reflected in Wiki EMA5 Move
+df = df.drop(columns = ["Goog Total"]) # reflected in Goog features
+df = df.drop(columns = ["Goog Gain", "Goog Loss"]) # reflected in "Change in Goog"
+df = df.drop(columns = ["Goog Avg. Gain", "Goog Avg. Loss"]) # reflected in RS
+df = df.drop(columns = ["Goog RS"]) # reflected in "Change in Goog"
+df = df.drop(columns = ["Goog ROC"]) # reflected in Goog ROC Move
+df = df.drop(columns = ["Goog MA3"]) # reflected in Goog 3day Disparity
+df = df.drop(columns = ["Goog EMA5"]) # reflected in Goog EMA5 Move
+df = df.drop(columns = ["Goog 3day Disparity"]) # reflected in Goog 3day Disparity Move
+df = df.drop(columns = ["Goog RSI (14 days)"]) # reflected in Goog RSI Move
+df = df.drop(columns = ["Price RSI (14 days)"]) # reflected in Price RSI Move
+
 
 # Train/test split
 X = df.iloc[:, 1:-1]
