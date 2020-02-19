@@ -106,8 +106,8 @@ plt.ylabel('Variance (%)') # for each component
 plt.show()
 
 # Model =======================================================================================
-from sklearn.ensemble import RandomForestClassifier
-model = RandomForestClassifier(n_estimators = 200, max_depth = 4, random_state = 1)
+from sklearn.tree import DecisionTreeClassifier
+model = DecisionTreeClassifier(max_depth = 4, random_state = 0)
 model.fit(X_train, Y_train)
 
 # Make predictions
