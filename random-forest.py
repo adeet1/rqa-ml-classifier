@@ -46,6 +46,12 @@ def dataset_split(X, Y, test_size):
 
 X_train, X_test, Y_train, Y_test = dataset_split(X, Y, test_size = 0.2)
 
+# Analyze the balance of the classification problem
+# i.e. the percentage of 1s and 0s in the target
+counts = Y_train.groupby(by = Y_train).count()
+counts = pd.Series(counts)
+print(counts)
+
 # Feature scaling
 from sklearn.preprocessing import StandardScaler
 sc = StandardScaler().fit(X_train)
