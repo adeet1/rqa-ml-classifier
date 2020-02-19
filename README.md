@@ -72,17 +72,6 @@ The [aapl.xlsx](aapl.xlsx) file contains data for Apple ranging from July 1, 201
 * **Target**: Boolean value; equal to 1 if the given day's close stock price is larger than that of the previous day, and 0 otherwise. This value is predicted by the model.
 
 ## Issues & Next Steps
-Due to the low signal-to-noise ratio of this project's dataset (and financial market data in general), many of the attempted models (random forest, artificial neural networks, recurrent neural networks) are overfitting.
-
-As an example, the metrics for the random forest model are shown below:
-```
-           Training Set  Test Set
-Accuracy           73.6      45.9
-Precision          69.8       0.0
-Recall             87.2       0.0
-F1 Score           77.5       0.0
-```
-
-The file [random-forest.py](random-forest.py) contains an in-progress implementation of a feature selection method. This implementation creates clustermaps via ```seaborn```, which provide a visual representation of the correlations between features. An attempt has been made to filter features based on their correlation.
+Due to the low signal-to-noise ratio of this project's dataset (and financial market data in general), many of the attempted models (random forest, decision trees, artificial neural networks, recurrent neural networks) are overfitting.
 
 Therefore, the next major step for this project will be feature selection, as it will dictate the reliability of the models.
