@@ -122,22 +122,18 @@ Y_train_pred = pd.Series(model.predict(X_train)).astype(int)
 
 # Evaluate model
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
-train_scores = np.array([accuracy_score(Y_train, Y_train_pred),
-                         precision_score(Y_train, Y_train_pred),
-                         recall_score(Y_train, Y_train_pred),
-                         f1_score(Y_train, Y_train_pred)]) * 100
-    
-test_scores = np.array([accuracy_score(Y_test, Y_test_pred),
-                        precision_score(Y_test, Y_test_pred),
-                        recall_score(Y_test, Y_test_pred),
-                        f1_score(Y_test, Y_test_pred)]) * 100
-
-train_scores = np.round(train_scores, 1)
-test_scores = np.round(test_scores, 1)
+import numpy as np
 
 # Print metrics
-metrics = pd.DataFrame()
-metrics["Training Set"] = train_scores
-metrics["Test Set"] = test_scores
-metrics = metrics.set_index(np.array(["Accuracy", "Precision", "Recall", "F1 Score"]))
+metrics = \
+[ \
+[accuracy_score(Y_train, Y_train_pred), accuracy_score(Y_test, Y_test_pred)],
+[precision_score(Y_train, Y_train_pred), precision_score(Y_test, Y_test_pred)], [recall_score(Y_train, Y_train_pred), recall_score(Y_test, Y_test_pred)],
+[f1_score(Y_train, Y_train_pred), f1_score(Y_test, Y_test_pred)]
+]
+metrics = np.array(metrics) * 100
+
+metrics = pd.DataFrame(metrics, columns = ["Training Set", "Test Set"])
+metrics.insert(0, "Metric", ["Accuracy", "Precision", "Recall", "F1 Score"])
+metrics.set_index("Metric", inplace = True)
 print(metrics)
