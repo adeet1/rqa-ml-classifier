@@ -53,8 +53,8 @@ counts = pd.Series(counts)
 print(counts)
 
 # Feature scaling
-from sklearn.preprocessing import StandardScaler
-sc = StandardScaler().fit(X_train)
+from sklearn.preprocessing import MinMaxScaler
+sc = MinMaxScaler().fit(X_train)
 X_train = pd.DataFrame(sc.transform(X_train), columns = X.columns)
 X_test = pd.DataFrame(sc.transform(X_test), columns = X.columns)
 
