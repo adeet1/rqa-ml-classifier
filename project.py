@@ -120,6 +120,9 @@ model.fit(X_train, Y_train)
 Y_test_pred = pd.Series(model.predict(X_test)).astype(int)
 Y_train_pred = pd.Series(model.predict(X_train)).astype(int)
 
+from sklearn.metrics import classification_report
+print(classification_report(Y_test_pred, Y_test, target_names = ["be flat", "be long"]))
+
 # Evaluate model
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import numpy as np
