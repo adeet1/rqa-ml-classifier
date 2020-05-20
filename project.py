@@ -122,14 +122,19 @@ plt.xlabel('Number of Components')
 plt.ylabel('Variance (%)') # for each component
 plt.show()
 
+# Run PCA algorithm (the optimal number of components is wherever the elbow in the graph occurs)
+pca = PCA(n_components = 5).fit(X_train)
+X_train_pca = pca.transform(X_train)
+X_test_pca = pca.transform(X_test)
+
 # Model =======================================================================================
 from sklearn.tree import DecisionTreeClassifier
 model = DecisionTreeClassifier(max_depth = 4, random_state = 0)
-model.fit(X_train, Y_train)
+model.fit(X_train_pca, Y_train)
 
 # Make predictions
-Y_test_pred = pd.Series(model.predict(X_test)).astype(int)
-Y_train_pred = pd.Series(model.predict(X_train)).astype(int)
+Y_test_pred = pd.Series(model.predict(X_test_pca)).astype(int)
+Y_train_pred = pd.Series(model.predict(X_train_pca)).astype(int)
 
 from sklearn.metrics import classification_report
 print(classification_report(Y_test_pred, Y_test, target_names = ["be flat", "be long"]))
