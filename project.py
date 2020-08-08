@@ -32,7 +32,7 @@ Goog RSI (14 days)..................... reflected in Goog RSI Move
 Price RSI (14 days).................... reflected in Price RSI Move
 """
 
-df.drop(columns = ["Open", "Close", "High", "Low", "Gain", "Loss", \
+df.drop(columns = ["Open", "High", "Low", "Gain", "Loss", \
                    "Average Gain", "Average Loss", "RS", "Wiki Traffic", \
                    "Wiki Traffic- 1 Day Lag", "PE Ratio", "Wiki 5day disparity", \
                    "Wiki MA3 Move", "Wiki MA5 Move", "Goog Total", "Goog Gain", \
@@ -44,7 +44,7 @@ df.drop(columns = ["Open", "Close", "High", "Low", "Gain", "Loss", \
 df["Stochastic Oscillator (14 days)"] = df["Stochastic Oscillator (14 days)"].astype(float)
 
 # Train/test split
-X = df.iloc[:, 1:-1]
+X = df.iloc[:, 2:-1]
 Y = df.iloc[:, -1]
 
 def dataset_split(X, Y, test_size):
@@ -53,9 +53,9 @@ def dataset_split(X, Y, test_size):
     X_test = X.iloc[ind:, :]
     Y_train = Y.iloc[:ind]
     Y_test = Y.iloc[ind:]
-    return X_train, X_test, Y_train, Y_test
+    return X_train, X_test, Y_train, Y_test, ind
 
-X_train, X_test, Y_train, Y_test = dataset_split(X, Y, test_size = 0.2)
+X_train, X_test, Y_train, Y_test, split_ind = dataset_split(X, Y, test_size = 0.2)
 
 # Analyze the balance of the classification problem
 # i.e. the percentage of 1s and 0s in the target
