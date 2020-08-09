@@ -32,6 +32,8 @@ Goog RSI (14 days)..................... reflected in Goog RSI Move
 Price RSI (14 days).................... reflected in Price RSI Move
 """
 
+open_prices = df["Open"]
+
 df.drop(columns = ["Open", "High", "Low", "Gain", "Loss", \
                    "Average Gain", "Average Loss", "RS", "Wiki Traffic", \
                    "Wiki Traffic- 1 Day Lag", "PE Ratio", "Wiki 5day disparity", \

@@ -1,4 +1,4 @@
-from project import df, X_test, Y_test_pred, Y_test, split_ind
+from project import df, X_test, Y_test_pred, Y_test, split_ind, open_prices
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -19,7 +19,7 @@ commission = 4.95
 buy_or_sell = Y_test_pred.values
 
 # Convert prices array from type object to type float
-prices = df.loc[split_ind:, "Close"].astype(float).values
+prices = open_prices[split_ind:].astype(float).values
 
 # The change in shares
 # positive = shares bought on day i (number of shares increases)
