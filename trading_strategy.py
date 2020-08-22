@@ -157,15 +157,27 @@ print("Mean daily return:", str(np.round(mean_bh, 5)) + "%")
 print("Standard deviation of daily returns (volatility):", str(np.round(std_bh, 5)) + "%")
 print("Annual return:", str(np.round(cagr_bh, 2)) + "%")
 
-# Max drawdown
+# Max drawdown for ML algorithm
 # https://quant.stackexchange.com/questions/18094/how-can-i-calculate-the-maximum-drawdown-mdd-in-python
 peak = pd.Series(portfolio_over_time).cummax()
 daily_drawdown = prices / peak - 1.0
 max_daily_drawdown = pd.Series(daily_drawdown).cummin()
 
 # Plot max drawdown
-plt.plot(max_daily_drawdown)
+plt.plot(max_daily_drawdown, color = "blue")
 plt.xlabel("Day #")
 plt.ylabel("Max Daily Drawdown")
-plt.title("Max Daily Drawdown over Time (ML Algorithm)")
+plt.title("Max Daily Drawdown over Time\n(ML Algorithm)")
+plt.show()
+
+# Max drawdown for buy and hold AAPL
+peak_bh = pd.Series(portfolio_over_time_bh).cummax()
+daily_drawdown_bh = prices / peak_bh - 1.0
+max_daily_drawdown_bh = pd.Series(daily_drawdown_bh).cummin()
+
+# Plot max drawdown
+plt.plot(max_daily_drawdown_bh, color = "orange")
+plt.xlabel("Day #")
+plt.ylabel("Max Daily Drawdown")
+plt.title("Max Daily Drawdown over Time\n(Buy and Hold AAPL)")
 plt.show()
