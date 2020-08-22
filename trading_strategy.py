@@ -99,10 +99,19 @@ plt.show()
 portfolio_change = np.diff(portfolio_over_time)
 percent_returns = np.divide(portfolio_change, portfolio_over_time[:-1]) * 100
 
-plt.hist(percent_returns, bins = 10)
+plt.hist(percent_returns, bins = 10, color = "blue")
 plt.xlabel("Daily Return (%)")
 plt.ylabel("Frequency")
-plt.title("Histogram of Daily Portfolio Returns: Realized and Unrealized (ML Algorithm)")
+plt.title("Histogram of Daily Portfolio Returns: Realized and Unrealized\n(ML Algorithm)")
+plt.show()
+
+portfolio_change_bh = np.diff(portfolio_over_time_bh)
+percent_returns_bh = np.divide(portfolio_change_bh, portfolio_over_time_bh[:-1]) * 100
+
+plt.hist(percent_returns_bh, bins = 10, color = "orange")
+plt.xlabel("Daily Return (%)")
+plt.ylabel("Frequency")
+plt.title("Histogram of Daily Portfolio Returns: Realized and Unrealized\n(Buy and Hold AAPL)")
 plt.show()
 
 stats.probplot(percent_returns, plot = plt)
