@@ -16,7 +16,10 @@ commission = 4.95
 # ===============================================================
 
 # Buy or sell indicator array (1 = buy, 0 = sell)
+# Note: the "_bh" suffix indicates the corresponding arrays for a buy-and-hold AAPL strategy
 buy_or_sell = Y_test_pred.values
+buy_or_sell_bh = np.zeros_like(Y_test_pred)
+buy_or_sell_bh[0] = 1
 
 # Convert prices array from type object to type float
 prices = open_prices[split_ind:].astype(float).values
@@ -27,13 +30,15 @@ prices = open_prices[split_ind:].astype(float).values
 shares_change = np.zeros_like(buy_or_sell).astype(int)
 np.place(shares_change, buy_or_sell == 1, shares)
 np.place(shares_change, buy_or_sell == 0, -shares)
+shares_change_bh = np.zeros_like(buy_or_sell_bh).astype(int)
+shares_change_bh[0] = shares
 
 # The change in cash
 # positive = gross proceeds from selling shares
 # negative = purchase amount for buying shares
 cash_change = np.zeros_like(buy_or_sell).astype(float)
 
-# Populate cash_change and sec_change arrays
+# Populate cash_change array
 for i in range(len(buy_or_sell)):
     # Buy
     if buy_or_sell[i] == 1:
@@ -45,25 +50,36 @@ for i in range(len(buy_or_sell)):
         amount = shares * prices[i] - commission
         cash_change[i] = amount
 
+cash_change_bh = np.zeros_like(buy_or_sell).astype(float)
+for i in range(len(buy_or_sell)):
+    # Buy
+    if buy_or_sell_bh[i] == 1:
+        amount = shares * prices[i] + commission
+        cash_change_bh[i] = -amount
+
 # Cash over time
 # (array index i is the amount of cash we have on day i)
 # An increase in cash --> added gross proceeds from selling shares
 # A decrease in cash --> subtracted purchase amount from buying shares
 cash_over_time = init_cash + np.cumsum(cash_change)
+cash_over_time_bh = init_cash + np.cumsum(cash_change_bh)
 
 # Shares over time
 # (array index i is the number of shares we own on day i)
 # An increase in shares --> shares bought
 # A decrease in shares --> shares sold
 shares_over_time = np.cumsum(shares_change).astype(int)
+shares_over_time_bh = np.cumsum(shares_change_bh).astype(int)
 
 # Securities value over time
 # (array index i is the securities value on day i)
 sec_over_time = np.multiply(shares_over_time, prices)
+sec_over_time_bh = np.multiply(shares_over_time_bh, prices)
 
 # Total portfolio value over time
 # (array index i is the portfolio value on day i)
 portfolio_over_time = np.add(cash_over_time, sec_over_time)
+portfolio_over_time_bh = np.add(cash_over_time_bh, sec_over_time_bh)
 
 # =====================
 # Plots
@@ -71,10 +87,12 @@ portfolio_over_time = np.add(cash_over_time, sec_over_time)
 
 # Plot graph of portfolio value
 plt.figure()
-plt.plot(portfolio_over_time / 1000)
+plt.plot(portfolio_over_time / 1000, color = "blue")
+plt.plot(portfolio_over_time_bh / 1000, color = "orange")
 plt.xlabel("Day #")
 plt.ylabel("Portfolio Value ($) in Thousands")
 plt.title("Portfolio Value over Time (in Thousands)")
+plt.legend(["ML Algorithm", "Buy and Hold AAPL"])
 plt.show()
 
 # Plot histogram of daily portfolio returns
@@ -84,7 +102,7 @@ percent_returns = np.divide(portfolio_change, portfolio_over_time[:-1]) * 100
 plt.hist(percent_returns, bins = 10)
 plt.xlabel("Daily Return (%)")
 plt.ylabel("Frequency")
-plt.title("Histogram of Daily Portfolio Returns (Realized and Unrealized)")
+plt.title("Histogram of Daily Portfolio Returns: Realized and Unrealized (ML Algorithm)")
 plt.show()
 
 stats.probplot(percent_returns, plot = plt)
@@ -119,5 +137,5 @@ max_daily_drawdown = pd.Series(daily_drawdown).cummin()
 plt.plot(max_daily_drawdown)
 plt.xlabel("Day #")
 plt.ylabel("Max Daily Drawdown")
-plt.title("Max Daily Drawdown over Time")
+plt.title("Max Daily Drawdown over Time (ML Algorithm)")
 plt.show()
