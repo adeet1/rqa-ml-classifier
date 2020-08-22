@@ -115,9 +115,14 @@ plt.title("Histogram of Daily Portfolio Returns: Realized and Unrealized\n(Buy a
 plt.show()
 
 stats.probplot(percent_returns, plot = plt)
+plt.title("Normal Probability Plot of Daily Returns\n(ML Algorithm)")
 plt.show()
 
-print("From the normal probability plot, it seems like the daily portfolio returns are approximately normally distributed.")
+stats.probplot(percent_returns_bh, plot = plt)
+plt.title("Normal Probability Plot of Daily Returns\n(Buy and Hold AAPL)")
+plt.show()
+
+print("From both normal probability plots, it seems like the daily portfolio returns are approximately normally distributed.")
 print("")
 
 # =====================
