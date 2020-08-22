@@ -132,14 +132,30 @@ print("")
 # Mean and standard deviation of daily returns
 mean = np.mean(percent_returns)
 std = np.std(percent_returns, ddof = 1)
-print("Mean daily return:", str(np.round(mean, 5)) + "%")
-print("Standard deviation of daily returns (volatility):", str(np.round(std, 5)) + "%")
+mean_bh = np.mean(percent_returns_bh)
+std_bh = np.std(percent_returns_bh, ddof = 1)
 
 # CAGR
 end_val = portfolio_over_time[-1]
+end_val_bh = portfolio_over_time_bh[-1]
 years = prices.size / 365
 cagr = ((end_val / init_cash)**(1 / years) - 1) * 100
+cagr_bh = ((end_val_bh / init_cash)**(1 / years) - 1) * 100
+
+print("---------------------------------------")
+print("ML Algorithm")
+print("---------------------------------------")
+print("Mean daily return:", str(np.round(mean, 5)) + "%")
+print("Standard deviation of daily returns (volatility):", str(np.round(std, 5)) + "%")
 print("Annual return:", str(np.round(cagr, 2)) + "%")
+print("")
+
+print("---------------------------------------")
+print("Buy and Hold AAPL")
+print("---------------------------------------")
+print("Mean daily return:", str(np.round(mean_bh, 5)) + "%")
+print("Standard deviation of daily returns (volatility):", str(np.round(std_bh, 5)) + "%")
+print("Annual return:", str(np.round(cagr_bh, 2)) + "%")
 
 # Max drawdown
 # https://quant.stackexchange.com/questions/18094/how-can-i-calculate-the-maximum-drawdown-mdd-in-python
