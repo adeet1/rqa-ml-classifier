@@ -147,12 +147,33 @@ years = prices.size / 365
 cagr = ((end_val / init_cash)**(1 / years) - 1) * 100
 cagr_bh = ((end_val_bh / init_cash)**(1 / years) - 1) * 100
 
+# Sharpe ratio
+# Treasury rates obtained from https://www.treasury.gov/resource-center/data-chart-center/interest-rates/pages/TextView.aspx?data=yieldYear&year=2018
+treasury = pd.read_csv("treasury_rates.csv")
+treasury_rates = treasury.loc[:, ["1 yr"]]
+treasury_rates.index = pd.to_datetime(treasury.loc[:, "Date"])
+
+daily_returns = pd.DataFrame()
+daily_returns["Return"] = percent_returns
+daily_returns.index = pd.Series(df.loc[split_ind+1:, "Date"])
+
+portfolio_vs_treas = daily_returns.join(how = "left", other = treasury_rates, on = daily_returns.index, lsuffix = "_1", rsuffix = "_2")
+portfolio_vs_treas.columns = ["Daily Return", "1 Year Treasury"]
+
+excess_returns = portfolio_vs_treas["Daily Return"] - portfolio_vs_treas["1 Year Treasury"]
+treas_mean = np.mean(portfolio_vs_treas["1 Year Treasury"])
+excess_returns_std = np.std(excess_returns, ddof = 1)
+
+sharpe_ratio = (cagr - treas_mean) / excess_returns_std
+sharpe_ratio = np.round(sharpe_ratio, 2)
+
 print("---------------------------------------")
 print("ML Algorithm")
 print("---------------------------------------")
 print("Mean daily return:", str(np.round(mean, 5)) + "%")
 print("Standard deviation of daily returns (volatility):", str(np.round(std, 5)) + "%")
 print("Annual return:", str(np.round(cagr, 2)) + "%")
+print("Sharpe ratio:", sharpe_ratio)
 print("")
 
 print("---------------------------------------")
