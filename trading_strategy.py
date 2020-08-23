@@ -85,14 +85,19 @@ portfolio_over_time_bh = np.add(cash_over_time_bh, sec_over_time_bh)
 # Plots
 # =====================
 
+prices_qqq = pd.read_csv("qqq.csv")["Close"][split_ind+14:].values
+prices_qqq_percent_change = np.divide(np.diff(prices_qqq), prices_qqq[:-1])
+value_qqq = init_cash * np.cumprod(1 + prices_qqq_percent_change)
+
 # Plot graph of portfolio value
 plt.figure()
 plt.plot(portfolio_over_time / 1000, color = "blue")
 plt.plot(portfolio_over_time_bh / 1000, color = "orange")
+plt.plot(value_qqq / 1000, color = "purple")
 plt.xlabel("Day #")
 plt.ylabel("Portfolio Value ($) in Thousands")
 plt.title("Portfolio Value over Time (in Thousands)")
-plt.legend(["ML Algorithm", "Buy and Hold AAPL"])
+plt.legend(["ML Algorithm", "Buy and Hold AAPL", "QQQ"])
 plt.show()
 
 # Plot histogram of daily portfolio returns
