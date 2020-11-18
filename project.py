@@ -141,6 +141,12 @@ report = pd.DataFrame(report).T
 print(report)
 print("")
 
+# Tree diagram
+from sklearn.tree import plot_tree
+fig, ax = plt.subplots()
+plot_tree(model, ax = fig)
+plt.show()
+
 # Evaluate model
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
 import numpy as np
