@@ -136,7 +136,10 @@ Y_test_pred = pd.Series(model.predict(X_test_pca)).astype(int)
 Y_train_pred = pd.Series(model.predict(X_train_pca)).astype(int)
 
 from sklearn.metrics import classification_report
-print(classification_report(Y_test_pred, Y_test, target_names = ["be flat", "be long"]))
+report = classification_report(Y_test_pred, Y_test, target_names = ["be flat", "be long"], output_dict = True)
+report = pd.DataFrame(report).T
+print(report)
+print("")
 
 # Evaluate model
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
