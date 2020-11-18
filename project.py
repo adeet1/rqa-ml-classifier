@@ -67,19 +67,16 @@ print(counts)
 
 # Feature scaling
 from sklearn.preprocessing import MinMaxScaler
-sc = MinMaxScaler().fit(X_train)
-X_train = pd.DataFrame(sc.transform(X_train), columns = X.columns)
-X_test = pd.DataFrame(sc.transform(X_test), columns = X.columns)
+sc = MinMaxScaler()
+X_train_sc = pd.DataFrame(sc.fit_transform(X_train), columns = X.columns)
+X_test_sc = pd.DataFrame(sc.transform(X_test), columns = X.columns)
 
 # Each feature's correlation with every other feature
-corr_matrix = X_train.corr()
+corr_matrix = X_train_sc.corr()
 
 # Each feature's correlation with the target variable
-feature_target_corr = X_train.corrwith(Y_train, method = "pearson")
+feature_target_corr = X_train_sc.corrwith(Y_train, method = "pearson")
 feature_target_corr = feature_target_corr.sort_values(ascending = False)
-
-# Each feature's correlation with every other feature
-corr_matrix = X_train.corr()
 
 # Select features based on correlation
 all_features = X.columns.to_list()
@@ -108,16 +105,16 @@ for i in range(0, len(corr_matrix)):
                 # that's already been removed
                 pass
 
-X_train = X_train[selected_features]
-X_test = X_test[selected_features]
+X_train_tr = X_train_sc[selected_features]
+X_test_tr = X_test_sc[selected_features]
 
-corr_matrix_selected_features = X_train.corr()
+corr_matrix_selected_features = X_train_tr.corr()
 
 # Plot number of components vs. explained variance for PCA algorithm
 from sklearn.decomposition import PCA
 import matplotlib.pyplot as plt
 import numpy as np
-pca = PCA().fit(X_train)
+pca = PCA().fit(X_train_tr)
 plt.figure()
 plt.plot(np.cumsum(pca.explained_variance_ratio_))
 plt.xlabel('Number of Components')
@@ -125,9 +122,9 @@ plt.ylabel('Variance (%)') # for each component
 plt.show()
 
 # Run PCA algorithm (the optimal number of components is wherever the elbow in the graph occurs)
-pca = PCA(n_components = 5).fit(X_train)
-X_train_pca = pca.transform(X_train)
-X_test_pca = pca.transform(X_test)
+pca = PCA(n_components = 5).fit(X_train_tr.to_numpy())
+X_train_pca = pca.transform(X_train_tr.to_numpy())
+X_test_pca = pca.transform(X_test_tr.to_numpy())
 
 # Model =======================================================================================
 from sklearn.tree import DecisionTreeClassifier
