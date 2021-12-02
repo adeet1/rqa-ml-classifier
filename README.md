@@ -70,8 +70,3 @@ The [aapl.xlsx](aapl.xlsx) file contains data for Apple ranging from July 1, 201
 * **Google MA6**: The trailing 6-day average of the Google traffic.
 * **Google_Move**: Boolean value; equal to 1 if the given day's total Google traffic is larger than that of the previous day, and 0 otherwise.
 * **Target**: Boolean value; equal to 1 if the given day's close stock price is larger than that of the previous day, and 0 otherwise. This value is predicted by the model.
-
-## Issues & Next Steps
-Due to the low signal-to-noise ratio of this project's dataset (and financial market data in general), many of the attempted models (random forest, decision trees, artificial neural networks, recurrent neural networks) are overfitting.
-
-Therefore, the next major step for this project will be feature selection, as it will dictate the reliability of the models.
